@@ -16,4 +16,5 @@
 %obs: 'ca' ca(x)
 %obs: 'P-Ca' ca(x!1), P(x!1)
 %obs: 'P' P(x)
+%obs: 'TotCa' ca(x?)
 
