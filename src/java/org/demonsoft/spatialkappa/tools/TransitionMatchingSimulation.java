@@ -201,10 +201,13 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         while (!noTransitionsPossible && !stop && time < totalTime);
         notifyObservationListeners(true, 1);
     }
-    
     public void runByTime2(float stepEndTime) {
+        runByTime2(stepEndTime, true);
+    }
+
+    public void runByTime2(float stepEndTime, boolean progress) {
         if (verbose) {
-            System.out.println("runByTime2. time = " + time + " ; stepEndTime = " + stepEndTime);
+            System.out.println("\rTime = " + time + " / " + stepEndTime + " [" + time/stepEndTime*100 + "%]");
         }
     	  startTime = Calendar.getInstance().getTimeInMillis();
         stop = false;
@@ -217,6 +220,9 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
             }
             resetTransitionsFiredCount();
             while (time < stepEndTime && !noTransitionsPossible && !stop) {
+                if (progress) {
+                    System.out.format("\rTime = %12.5f/%5.5f [%3.3f%%]", time, stepEndTime, time/stepEndTime*100);
+                }
                 float nextEventTime = time + getTimeDelta();
                 if (verbose) {
                     System.out.println("runByTime2: nextEventTime = " + nextEventTime);
@@ -224,6 +230,10 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
                 if (nextEventTime > stepEndTime) {
                     time = stepEndTime;
                     notifyObservationListeners(true, 1);
+                    if (progress) {
+                        System.out.format("\rTime = %12.5f/%5.5f [%3.3f%%]\n", time, stepEndTime, 100.0);
+                        System.out.flush();
+                    }
                     return;
                 }
                 int clashes = 0;
