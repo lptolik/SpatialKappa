@@ -1,0 +1,16 @@
+This project is licenced under the GNU Lesser General Public Licence
+Version 3 (LGPLv3, http://www.gnu.org/licenses/lgpl.html).
+
+Included third party libraries are released under their respective
+licences, listed below:
+
+Library             Home site                                             License
+Antlr v3.2 	        http://www.antlr.org                                  http://www.antlr.org/license.html
+jlfgr v1.0 	        http://java.sun.com/developer/techDocs/hi/repository/ Included in archive
+commons io v1.4 	  http://commons.apache.org/io/                         http://commons.apache.org/io/license.html
+jcommon v1.0.16 	  http://www.jfree.org/jcommon/                         http://www.gnu.org/licenses/lgpl.html
+jfreechart v1.0.13 	http://www.jfree.org/jfreechart/                      http://www.gnu.org/licenses/lgpl.html
+EasyMock v3.0 	    http://easymock.org/ 	                                http://easymock.org/License.html
+CgLib v2.2 	        http://cglib.sourceforge.net/ 	                      http://www.apache.org/foundation/licence-FAQ.html
+Objenesis v1.2 	    http://objenesis.googlecode.com/svn/docs/index.html 	http://objenesis.googlecode.com/svn/docs/license.html
+ASM v3.3.1 	        http://asm.ow2.org/index.html 	                      http://asm.ow2.org/license.html

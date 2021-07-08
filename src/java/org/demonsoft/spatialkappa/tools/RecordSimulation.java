@@ -42,12 +42,12 @@ public class RecordSimulation implements Simulation, ObservationListener {
         simulation.runByEvent(steps, stepSize);
     }
 
-    public void runByTime(float steps, float stepSize) {
+    public void runByTime(double steps, double stepSize) {
         simulation.runByTime(steps, stepSize);
     }
 
-    public void runByTime2(float stepEndTime) {
-        simulation.runByTime2(stepEndTime);
+    public void runByTime2(double stepEndTime, boolean progress) throws Exception {
+        simulation.runByTime2(stepEndTime, progress);
     }
 
 

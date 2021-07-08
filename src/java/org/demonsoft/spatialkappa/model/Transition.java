@@ -747,6 +747,12 @@ public class Transition {
                 }
             }
         }
+
+        if (bestPrimitives == null) {
+            System.out.println("Transition.getApplicationCount(): bestPrimitives == null; Transition:");
+            System.out.println(this.toString());
+            return 0;
+        }
         
         int applicationCount = 1;
         for (TransitionPrimitive primitive : bestPrimitives) {

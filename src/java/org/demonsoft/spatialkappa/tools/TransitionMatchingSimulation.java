@@ -5,6 +5,7 @@ import static org.demonsoft.spatialkappa.model.Utils.getChannel;
 import static org.demonsoft.spatialkappa.model.Utils.getCompartment;
 import static org.demonsoft.spatialkappa.model.Utils.getComplexes;
 import static org.demonsoft.spatialkappa.model.Utils.getList;
+import org.demonsoft.spatialkappa.model.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,14 +68,14 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     
     private boolean stop = false;
     private boolean noTransitionsPossible = false;
-    private float time = 0;
+    private double time = 0;
     private long startTime;
     int eventCount = 0;
     
     private final IKappaModel kappaModel;
     private final List<ObservationListener> observationListeners = new ArrayList<ObservationListener>();
     private final ComplexMatcher matcher = new ComplexMatcher();
-    private float maximumTime;
+    private double maximumTime;
     private int maximumEventCount;
     private boolean verbose = false;
     
@@ -176,7 +177,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         notifyObservationListeners(true, 1);
     }
 
-    public void runByTime(float totalTime, float timePerStep) {
+    public void runByTime(double totalTime, double timePerStep) {
         startTime = Calendar.getInstance().getTimeInMillis();
         stop = false;
         maximumTime = totalTime;
@@ -184,7 +185,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
 
         do {
             resetTransitionsFiredCount();
-            float stepEndTime = getNextEndTime(time, timePerStep);
+            double stepEndTime = getNextEndTime(time, timePerStep);
             while (time < stepEndTime && !noTransitionsPossible && !stop) {
                 int clashes = 0;
                 while (!runSingleEvent() && clashes < 1000 && !noTransitionsPossible && !stop) {
@@ -196,42 +197,61 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
                     System.out.println("Aborted timepoint");
                 }
             }
-            notifyObservationListeners(false, time / totalTime);
+            notifyObservationListeners(false, (float)(time / totalTime));
         }
         while (!noTransitionsPossible && !stop && time < totalTime);
         notifyObservationListeners(true, 1);
     }
-    
-    public void runByTime2(float stepEndTime) {
+
+    public void runByTime2(double stepEndTime, boolean progress) throws Exception {
         if (verbose) {
-            System.out.println("runByTime2. time = " + time + " ; stepEndTime = " + stepEndTime);
+            System.out.println("\rTime = " + time + " / " + stepEndTime + " [" + time/stepEndTime*100 + "%]");
         }
     	  startTime = Calendar.getInstance().getTimeInMillis();
         stop = false;
         maximumTime = stepEndTime;
         maximumEventCount = 0;
-          
+
+        // Time at start of step
+        double time0 = time;
+        // Local time in step
+        double ltime = 0;
+        // Local step end time
+        double lStepEndTime = stepEndTime - time0;
         do {
-            if (verbose) {
-                System.out.println("runByTime2: resetTransitionsFiredCount()");
-            }
-            resetTransitionsFiredCount();
-            while (time < stepEndTime && !noTransitionsPossible && !stop) {
-                float nextEventTime = time + getTimeDelta();
-                if (verbose) {
-                    System.out.println("runByTime2: nextEventTime = " + nextEventTime);
+            // DCS: 2019-05-05: This appears to be soley for reporting
+            // if (verbose) {
+            // System.out.println("runByTime2: resetTransitionsFiredCount()");
+            // }
+            // resetTransitionsFiredCount();
+            while (ltime < lStepEndTime && !noTransitionsPossible && !stop) {
+                if (progress) {
+                    System.out.format("\rTime = %12.5f/%5.5f [%3.3f%%]", time, stepEndTime, time/stepEndTime*100);
                 }
-                if (nextEventTime > stepEndTime) {
+                double dt = getTimeDelta();
+                if ((Math.log10(ltime) - Math.log10(dt)) > 12.0) {
+                    throw new Exception("dt is more than 12 orders of magnitude smaller than local time.");
+                }
+                double lNextEventTime = ltime + dt;
+                if (verbose) {
+                    System.out.printf("runByTime2: local nextEventTime = %f; t1 -t0 = %f\n", lNextEventTime, lNextEventTime - ltime);
+                }
+                if (lNextEventTime > lStepEndTime) {
                     time = stepEndTime;
                     notifyObservationListeners(true, 1);
+                    if (progress) {
+                        System.out.format("\rTime = %12.5f/%5.5f [%3.3f%%]\n", time, stepEndTime, 100.0);
+                        System.out.flush();
+                    }
                     return;
                 }
                 int clashes = 0;
-                while (!runSingleEvent2(nextEventTime) && clashes < 1000 && !noTransitionsPossible && !stop) {
+                while (!runSingleEvent2(time0, lNextEventTime) && clashes < 1000 && !noTransitionsPossible && !stop) {
                     // repeat
                     clashes++;
                     Thread.yield();
                 }
+                ltime = ltime + dt;
                 if (verbose) {
                     System.out.println("Event happened. time = " + time);
                 }
@@ -244,8 +264,8 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         notifyObservationListeners(true, 1);
     }
 
-    float getNextEndTime(float currentTime, float timePerStep) {
-        int eventsSoFar = Math.round(currentTime / timePerStep);
+    double getNextEndTime(double currentTime, double timePerStep) {
+        long eventsSoFar = Math.round(currentTime / timePerStep);
         return timePerStep * (eventsSoFar + 1);
     }
 
@@ -273,18 +293,18 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         return eventCount;
     }
     
-    public float getTime() {
+    public double getTime() {
         return time;
     }
 
-    public float getElapsedTime() {
+    public double getElapsedTime() {
         if (startTime == 0) {
             return 0;
         }
         return (Calendar.getInstance().getTimeInMillis() - startTime) / 1000f;
     }
 
-    public float getMaximumTime() {
+    public double getMaximumTime() {
         return maximumTime;
     }
 
@@ -306,7 +326,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         }
         long elapsedTime = Calendar.getInstance().getTimeInMillis() - startTime;
         long estimatedRemainingTime = ((long) (elapsedTime / progress)) - elapsedTime;
-        return new Observation(time, eventCount, kappaModel.getPlottedVariables(), result, finalEvent, elapsedTime, estimatedRemainingTime);
+        return new Observation((float)time, eventCount, kappaModel.getPlottedVariables(), result, finalEvent, elapsedTime, estimatedRemainingTime);
     }
 
     private boolean runSingleEvent() {
@@ -317,7 +337,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         return applyFiniteRateTransition();
     }
 
-    private boolean runSingleEvent2(float transitionTime) {
+    private boolean runSingleEvent2(double time0, double transitionTime) {
         if (verbose) {
             System.out.println("runSingleEvent2: transitionTime = " + transitionTime);
         }
@@ -331,9 +351,10 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
             return false;
         }	
         if (applyTransition(transition, false)) {
-            time = transitionTime;	
+            time = time0 + transitionTime;
             if (verbose) {
-                System.out.print("runSingleEvent2: Applying transition. time = " + time + "\n");
+                System.out.print("runSingleEvent2: Applying transition. local time = " + transitionTime + "\n");
+                System.out.print("runSingleEvent2: Applying transition. global time = " + time + "\n");
             }
             return true;
         } else {
@@ -380,15 +401,16 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         }
     }
 
-    private float getTimeDelta() {
+    private double getTimeDelta() {
         float totalQuantity = 0;
         for (Float current : finiteRateTransitionActivityMap.values()) {
             totalQuantity += current;
         }
+        double dt = -Math.log(Utils.random()) / totalQuantity;
         if (verbose) {
-            System.out.println("getTimeDelta: totalQuantity = " + totalQuantity);
+            System.out.printf("getTimeDelta: totalQuantity = %f; dt = %f\n", totalQuantity, dt);
         }
-        return (float) -Math.log(Math.random()) / totalQuantity;
+        return dt;
     }
 
     private Transition pickFiniteRateTransition() {
@@ -400,7 +422,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
             totalQuantity += entry.getValue();
         }
         Transition lastTransition = null;
-        float item = (float) (totalQuantity * Math.random());
+        float item = (float) (totalQuantity * Utils.random());
         for (Map.Entry<Transition, Float> entry : finiteRateTransitionActivityMap.entrySet()) {
             if (entry.getValue() > 0) {
                 lastTransition = entry.getKey();
@@ -425,7 +447,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
                 totalCount++;
             }
         }
-        float item = (float) (totalCount * Math.random());
+        float item = (float) (totalCount * Utils.random());
         for (Map.Entry<Transition, Boolean> entry : infiniteRateTransitionActivityMap.entrySet()) {
             if (entry.getValue() && item <= 1) {
                 return entry.getKey();
@@ -616,7 +638,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         return result;
     }
 
-    private Transition getTransition(String label) {
+    public Transition getTransition(String label) {
         for (Transition transition : getAllTransitions()) {
             if (label.equals(transition.label)) {
                 return transition;
@@ -768,6 +790,10 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         for (Map.Entry<String, Integer> entry : getCountsPerAgent().entrySet()) {
             builder.append(entry.getValue() + "\t" + entry.getKey() + "\n");
         }
+        builder.append("\nTransitions fired:" + "\n");
+        for (Map.Entry<Variable, Integer> entry : transitionsFiredMap.entrySet()) {
+            builder.append(entry.getKey().toString() + "\t" + entry.getValue() + "\n");
+        }
         return builder.toString();
     }
 
@@ -878,7 +904,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         }
 
         TransitionInstance lastInstance = null;
-        float randomValue = (float) (totalTransitionRate * Math.random());
+        float randomValue = (float) (totalTransitionRate * Utils.random());
         for (TransitionInstance transitionInstance : transitionInstances) {
             float rate = infiniteRate ? transitionInstance.activity : transitionInstance.totalRate;
             if (rate > 0) {

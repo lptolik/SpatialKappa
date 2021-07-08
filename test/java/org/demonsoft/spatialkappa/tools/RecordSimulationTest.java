@@ -174,6 +174,11 @@ public class RecordSimulationTest {
         public String getDebugOutput() {
             return null;
         }
+
+		public void runByTime2(float stepEndTime) {
+			// TODO Auto-generated method stub
+			
+		}
         
     }
     

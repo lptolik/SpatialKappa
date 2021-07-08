@@ -430,8 +430,8 @@ public class SpatialKappaSimulator implements ActionListener, ObservationListene
                 simulation.runByEvent(steps, stepSize);
             }
             else {
-                float steps = ((Double) toolbarSpinnerModelSteps.getValue()).floatValue();
-                float stepSize = ((Double) toolbarSpinnerModelStepSize.getValue()).floatValue();
+                double steps = ((Double) toolbarSpinnerModelSteps.getValue()).doubleValue();
+                double stepSize = ((Double) toolbarSpinnerModelStepSize.getValue()).doubleValue();
                 simulation.runByTime(steps, stepSize);
             }
         }

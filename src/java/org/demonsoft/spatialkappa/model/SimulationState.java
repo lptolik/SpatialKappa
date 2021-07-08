@@ -5,9 +5,9 @@ import java.util.Map;
 
 public interface SimulationState {
 
-    float getTime();
-    float getElapsedTime();
-    float getMaximumTime();
+    double getTime();
+    double getElapsedTime();
+    double getMaximumTime();
     int getEventCount();
     int getMaximumEventCount();
     

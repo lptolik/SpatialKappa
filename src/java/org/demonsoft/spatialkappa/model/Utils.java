@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Stack;
+import java.util.Random;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -294,6 +295,19 @@ public class Utils {
         nodes.setTokenStream(tokens);
         SpatialKappaWalker walker = new SpatialKappaWalker(nodes);
         return walker.prog();
+    }
+
+    private static Random r = new Random();
+
+    public static double random() {
+        double n = r.nextDouble();
+        // FIXME: Random seed not always working?
+        // System.out.println(n);
+        return(n);
+    }
+
+    public static void setSeed(long seed) {
+        r.setSeed(seed);
     }
 
 }

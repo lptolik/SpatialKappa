@@ -2,6 +2,7 @@ package org.demonsoft.spatialkappa.model;
 
 import static org.demonsoft.spatialkappa.model.Utils.getChannel;
 import static org.demonsoft.spatialkappa.model.Utils.getFlatString;
+import org.demonsoft.spatialkappa.model.Utils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -374,7 +375,7 @@ public abstract class TransitionPrimitive {
                     newLocation = newLocations.get(0);
                 }
                 else {
-                    int item = (int) (newLocations.size() * Math.random());
+                    int item = (int) (newLocations.size() * Utils.random());
                     newLocation =  newLocations.get(item);
                 }
                 
@@ -413,7 +414,7 @@ public abstract class TransitionPrimitive {
                         newLocations = newLocationLists.get(0);
                     }
                     else {
-                        int item = (int) (newLocationLists.size() * Math.random());
+                        int item = (int) (newLocationLists.size() * Utils.random());
                         newLocations =  newLocationLists.get(item);
                     }
     

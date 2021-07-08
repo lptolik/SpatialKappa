@@ -487,16 +487,16 @@ public class VariableExpression implements Serializable {
                 return new ObservationElement(state.getEventCount());
 
             case TIME:
-                return new ObservationElement(state.getTime());
+                return new ObservationElement((float)state.getTime());
 
             case MAX_TIME:
-                return new ObservationElement(state.getMaximumTime());
+                return new ObservationElement((float)state.getMaximumTime());
 
             case MAX_EVENTS:
                 return new ObservationElement(state.getMaximumEventCount());
 
             case ELAPSED_TIME:
-                return new ObservationElement(state.getElapsedTime());
+                return new ObservationElement((float)state.getElapsedTime());
             }
             break;
             

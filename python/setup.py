@@ -1,25 +1,28 @@
-from distutils.core import setup
-import os
-import shutil
-VERSION = '2.1.1'
-SKJAR_FILE = 'SpatialKappa-v' + VERSION + '.jar'
-SKJAR_FILE_PATH = os.path.join('..', SKJAR_FILE)
-ANTLRJAR_FILE = 'ant-antlr-3.2.jar'
-ANTLRJAR_FILE_PATH = os.path.join('..', ANTLRJAR_FILE)
-SHARE_DIR = 'SpatialKappa/share/SpatialKappa'
-try:
-    os.makedirs(SHARE_DIR)
-except:
-    pass
+import setuptools
 
-shutil.copyfile(ANTLRJAR_FILE_PATH, os.path.join(SHARE_DIR, ANTLRJAR_FILE))
-shutil.copyfile(SKJAR_FILE_PATH, os.path.join(SHARE_DIR, SKJAR_FILE))
+VERSION = '2.1.5'
+POSTVERSION = ''
 
-setup(name='SpatialKappa',
-      version=VERSION,
-      packages=['SpatialKappa'],
-      package_dir={'SpatialKappa': 'SpatialKappa'},
-      package_data={'SpatialKappa': ['share/SpatialKappa/*']})
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-os.unlink(os.path.join(SHARE_DIR, ANTLRJAR_FILE))
-os.unlink(os.path.join(SHARE_DIR, SKJAR_FILE))
+setuptools.setup(
+    name="SpatialKappa",
+    version=VERSION + POSTVERSION,
+    author="Donal Stewart, Anatoly Sorokin, David C Sterratt",
+    author_email="david.c.sterratt@ed.ac.uk",
+    description="Implementation of syntactic extension of Kappa to allow expression of location and transport in models",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/davidcsterratt/SpatialKappa",
+    packages=setuptools.find_packages(),
+    install_requires=['py4j'],
+    classifiers=(
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Java",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Operating System :: OS Independent",
+    ),
+    python_requires='<3',
+    package_data={'SpatialKappa': ['share/SpatialKappa/*', 'tests/*.ka']},
+    test_suite='SpatialKappa.tests')

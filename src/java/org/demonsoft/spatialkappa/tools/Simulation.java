@@ -13,9 +13,9 @@ public interface Simulation {
 
     void runByEvent(int steps, int stepSize);
 
-    void runByTime(float steps, float stepSize);
+    void runByTime(double steps, double stepSize);
 
-    void runByTime2(float stepEndTime);
+    void runByTime2(double stepEndTime, boolean progress) throws Exception;
 
     void stop();
 

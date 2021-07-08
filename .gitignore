@@ -5,4 +5,8 @@
 *.pyc
 *.pdf
 *.class
-
+*.tokens
+python/build
+python/dist
+python/SpatialKappa.egg-info
+python/SpatialKappa/share
